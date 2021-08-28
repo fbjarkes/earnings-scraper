@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/fbjarkes/earnings-scraper#readme",
   "dependencies": {
-    "puppeteer": "^10.2.0"
+    "puppeteer": "^10.2.0",
+    "yargs": "^17.1.1"
   }
 }
