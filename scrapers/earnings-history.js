@@ -73,27 +73,51 @@ class EarningsHistory {
         this.earnings[year][quarter] = q;                    
     }
 
-    calculateQuarterly() {
+    calculateQuarterlyAndQuarterly() {
         const currYear = new Date().getFullYear();
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < Object.keys(this.earnings).length; i++) {
             const quarters = this.earnings[currYear-i];
+            console.log(currYear-i);
             Object.keys(quarters).forEach(q => {
                 if (q === 'Q4') {
-                    this.earnings[currYear-i]['Q4']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q4']['revenue'] / this.earnings[currYear-i]['Q3']['revenue']) - 1) * 100
-                    this.earnings[currYear-i]['Q4']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q4']['revenue'] / this.earnings[currYear-i]['Q3']['revenue']) - 1) * 100
+                    if (this.earnings[currYear-i]['Q3']) {
+                        this.earnings[currYear-i]['Q4']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q4']['eps'] / this.earnings[currYear-i]['Q3']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q4']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q4']['revenue'] / this.earnings[currYear-i]['Q3']['revenue']) - 1) * 100
+                    }
+                    if (this.earnings[currYear-i-1]?.['Q4']) {
+                        this.earnings[currYear-i]['Q4']['eps Y/Y (%)'] = ((this.earnings[currYear-i]['Q4']['eps'] / this.earnings[currYear-i-1]['Q4']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q4']['rev Y/Y (%)'] = ((this.earnings[currYear-i]['Q4']['revenue'] / this.earnings[currYear-i-1]['Q4']['revenue']) - 1) * 100
+                    }                    
                 }
                 if (q === 'Q3') {                    
-                    this.earnings[currYear-i]['Q3']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q3']['eps'] / this.earnings[currYear-i]['Q2']['eps']) - 1) * 100
-                    this.earnings[currYear-i]['Q3']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q3']['revenue'] / this.earnings[currYear-i]['Q2']['revenue']) - 1) * 100
+                    if (this.earnings[currYear-i]['Q2']) {
+                        this.earnings[currYear-i]['Q3']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q3']['eps'] / this.earnings[currYear-i]['Q2']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q3']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q3']['revenue'] / this.earnings[currYear-i]['Q2']['revenue']) - 1) * 100
+                    }
+                    if (this.earnings[currYear-i-1]?.['Q3']) {
+                        this.earnings[currYear-i]['Q3']['eps Y/Y (%)'] = ((this.earnings[currYear-i]['Q3']['eps'] / this.earnings[currYear-i-1]['Q3']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q3']['rev Y/Y (%)'] = ((this.earnings[currYear-i]['Q3']['revenue'] / this.earnings[currYear-i-1]['Q3']['revenue']) - 1) * 100
+                    }                    
                 }
-                if (q === 'Q2') {                    
-                    this.earnings[currYear-i]['Q2']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q2']['eps'] / this.earnings[currYear-i]['Q1']['eps']) - 1) * 100
-                    this.earnings[currYear-i]['Q2']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q2']['revenue'] / this.earnings[currYear-i]['Q1']['revenue']) - 1) * 100
+                if (q === 'Q2') {      
+                    if (this.earnings[currYear-i]['Q1']) {              
+                        this.earnings[currYear-i]['Q2']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q2']['eps'] / this.earnings[currYear-i]['Q1']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q2']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q2']['revenue'] / this.earnings[currYear-i]['Q1']['revenue']) - 1) * 100
+                    }
+                    if (this.earnings[currYear-i-1]?.['Q2']) {
+                        this.earnings[currYear-i]['Q2']['eps Y/Y (%)'] = ((this.earnings[currYear-i]['Q2']['eps'] / this.earnings[currYear-i-1]['Q2']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q2']['rev Y/Y (%)'] = ((this.earnings[currYear-i]['Q2']['revenue'] / this.earnings[currYear-i-1]['Q2']['revenue']) - 1) * 100
+                    }                    
                 }
                 if (q === 'Q1' && this.earnings[currYear-i - 1]) {                    
                     this.earnings[currYear-i]['Q1']['eps Q/Q (%)'] = ((this.earnings[currYear-i]['Q1']['eps'] / this.earnings[currYear-i - 1]['Q4']['eps']) - 1) * 100
                     this.earnings[currYear-i]['Q1']['rev Q/Q (%)'] = ((this.earnings[currYear-i]['Q1']['revenue'] / this.earnings[currYear-i -1]['Q4']['revenue']) - 1) * 100
-                }
+
+                    if (this.earnings[currYear-i-1]?.['Q1']) {
+                        this.earnings[currYear-i]['Q1']['eps Y/Y (%)'] = ((this.earnings[currYear-i]['Q1']['eps'] / this.earnings[currYear-i-1]['Q1']['eps']) - 1) * 100
+                        this.earnings[currYear-i]['Q1']['rev Y/Y (%)'] = ((this.earnings[currYear-i]['Q1']['revenue'] / this.earnings[currYear-i-1]['Q1']['revenue']) - 1) * 100
+                    }                    
+                }                
             })
         }
     }
