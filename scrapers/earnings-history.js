@@ -36,6 +36,10 @@ class EarningsHistory {
 
     earnings = {}
     
+    getEarnings() {
+        return this.earnings;
+    }
+
     parseRevenue(revStr) {
         let rev;        
         const revenueLine = revStr.split('\n').filter(line => line.includes('Revenue')).pop();        
@@ -78,7 +82,7 @@ class EarningsHistory {
         if (this.earnings[year] === undefined) {
             this.earnings[year] = {}
         }   
-        this.earnings[year][quarter] = q;                    
+        this.earnings[year][quarter.replace('F','')] = q; // TODO: remove 'F' from string if present, FQ3 -> Q3              
     }
 
     calculateYearlyAndQuarterly() {

@@ -23,7 +23,7 @@ class SeekingAlphaScraper {
             const earningsHistory = new EarningsHistory();
             for (let element of elements) {
                 const [period, eps, revenue] = await Promise.all([element.$('.title-period'),element.$('.eps'),element.$('.revenue')]);            
-                const [{_remoteObject: {value: periodContent}}, {_remoteObject: {value: epsContent}}, {_remoteObject: {value: revContent}}] = await Promise.all([period.getProperty('textContent'), eps.getProperty('textContent'), revenue.getProperty('textContent')])                
+                const [{_remoteObject: {value: periodContent}}, {_remoteObject: {value: epsContent}}, {_remoteObject: {value: revContent}}] = await Promise.all([period.getProperty('textContent'), eps.getProperty('textContent'), revenue.getProperty('textContent')])                                
                 earningsHistory.addEarningsData(periodContent, epsContent, revContent);
             }
             earningsHistory.calculateYearlyAndQuarterly()
