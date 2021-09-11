@@ -53,12 +53,12 @@ class EarningsHistory {
 
     parseEps(epsStr) {
         const epsLine = epsStr.split('\n').filter(line => line.includes('EPS')).pop();
-        return parseFloat(epsLine.replace('$','').match(this.numberPattern).pop());
+        return parseFloat(epsLine.replace('$','').match(this.numberPattern)?.pop());
     }
 
     parseBeatOrMiss(epsStr) {
         const epsLine = epsStr.split('\n').filter(line => line.includes('by')).pop();
-        return parseFloat(epsLine?.replace('$','').match(this.numberPattern).pop());
+        return parseFloat(epsLine?.replace('$','').match(this.numberPattern)?.pop());
     }
 
     addEarningsData(period, eps, rev) {
@@ -82,7 +82,7 @@ class EarningsHistory {
         if (this.earnings[year] === undefined) {
             this.earnings[year] = {}
         }   
-        this.earnings[year][quarter.replace('F','')] = q; // TODO: remove 'F' from string if present, FQ3 -> Q3              
+        this.earnings[year][quarter.replace('F','')] = q;
     }
 
     calculateYearlyAndQuarterly() {
@@ -106,13 +106,16 @@ class EarningsHistory {
             } else {
                 return 'Neg';
             }                        
-        }
-        
+        }        
         for (let i = 0; i < Object.keys(this.earnings).length; i++) {
             const quarters = this.earnings[currYear-i];
-            const y = currYear - i;
+            const y = currYear - i;            
             Object.keys(quarters).forEach(q => {
-                if (q === 'Q4') {
+                this.earnings[y][q]['eps Q/Q (%)'] = '-';
+                this.earnings[y][q]['rev Q/Q (%)'] = '-';
+                this.earnings[y][q]['eps Y/Y (%)'] = '-';
+                this.earnings[y][q]['rev Y/Y (%)'] = '-';
+                if (q === 'Q4') {                    
                     if (this.earnings[y]['Q3']){
                         this.earnings[y]['Q4']['eps Q/Q (%)'] = _quarterlyGrowth('Q4','eps', 'Q3', y);
                         this.earnings[y]['Q4']['rev Q/Q (%)'] = _quarterlyGrowth('Q4', 'revenue', 'Q3', y);                        
@@ -132,7 +135,7 @@ class EarningsHistory {
                         this.earnings[y]['Q3']['rev Y/Y (%)'] = _yearlyGrowth('Q3', 'revenue', y); 
                     }                    
                 }
-                if (q === 'Q2') {      
+                if (q === 'Q2') {                
                     if (this.earnings[y]['Q1']) {
                         this.earnings[y]['Q2']['eps Q/Q (%)'] = _quarterlyGrowth('Q2','eps', 'Q1', y);
                         this.earnings[y]['Q2']['rev Q/Q (%)'] = _quarterlyGrowth('Q2', 'revenue', 'Q1', y);                                                           
@@ -142,7 +145,7 @@ class EarningsHistory {
                         this.earnings[y]['Q2']['rev Y/Y (%)'] = _yearlyGrowth('Q2', 'revenue', y);                        
                     }                    
                 }
-                if (q === 'Q1' && this.earnings[y - 1]) {                    
+                if (q === 'Q1' && this.earnings[y - 1]) {                                        
                     this.earnings[y]['Q1']['eps Q/Q (%)'] = _quarterlyGrowth('Q1','eps', 'Q4', y);
                     this.earnings[y]['Q1']['rev Q/Q (%)'] = _quarterlyGrowth('Q1', 'revenue', 'Q4', y);  
                     
