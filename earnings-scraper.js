@@ -20,11 +20,10 @@ const getSymbols = async (symbolsList, symbolsFile) => {
 };
 
 const printUsage = () => {
-	// eslint-disable-next-line
 	console.log('Usage');
 };
 
-const printEarnings = (earnings) => {		
+const printEarnings = (earnings, years) => {		
 	const _formatNumber = (n) => {
 		if (typeof n === 'number') {
 			return Math.round(n, 1);
@@ -48,7 +47,7 @@ const printEarnings = (earnings) => {
 		const years = earnings[key]['earnings'];
 		log(chalk.bold('\n'+earnings[key]['symbol']));
 		log(printf('%15s%14s%13s%10s%14s%13s','EPS', 'EPS Q/Q (%)', 'EPS Y/Y (%)', 'Rev', 'Rev Q/Q (%)', 'Rev Y/Y (%)'));
-		Object.keys(years).slice(-2).reverse().forEach(key => {			
+		Object.keys(years).slice(-years).reverse().forEach(key => {			
 			Object.entries(years[key]).forEach(([q, val]) => {
 				log(printf('%s%8s%14s%13s%10s%14s%13s', `${q} ${key}`,val['eps'], _formatNumber(val['eps Q/Q (%)']), _formatNumber(val['eps Y/Y (%)']), _formatRev(val['revenue']),_formatNumber(val['rev Q/Q (%)']), _formatNumber(val['rev Y/Y (%)'])));
 			});
@@ -64,7 +63,6 @@ const printEarnings = (earnings) => {
 }
 
 const download = async (symbol, scraper) => {		
-	// eslint-disable-next-line
 	console.log('Getting for data for symbol', symbol);
 	const res = await scraper.getEarnings(symbol);
 	return {symbol, earnings: res.earnings};		
@@ -76,10 +74,12 @@ const main = async () => {
 		// eslint-disable-next-line
 		process.exit(1);
 	}
+	let nbrChunks = parseInt(argv.parallel) || 3;
+	let nbrYears = parseInt(argv.years) || 2;
 	let results = [];
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
 
-	for (const chunk of _.chunk(symbols, 4)) {
+	for (const chunk of _.chunk(symbols, nbrChunks)) {
 		const scraper = new SeekingAlphaScraper();
 		await scraper.init(puppeteer);		
 		const res = await Promise.all(chunk.map(async sym => download(sym, scraper)));
@@ -88,7 +88,7 @@ const main = async () => {
 		// TODO: wait randomly for 1-5s?
 	}	
 	const res = _.flatten(results);	
-	printEarnings(res);
+	printEarnings(res, nbrYears);
 }
 
 main();
