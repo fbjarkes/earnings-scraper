@@ -1,4 +1,5 @@
-/* eslint-disable no-console */
+#!/usr/bin/env node
+
 const _ = require('lodash');
 const {printf} = require('fast-printf');
 const puppeteer = require('puppeteer');
@@ -23,7 +24,7 @@ const printUsage = () => {
 	console.log('Usage');
 };
 
-const printEarnings = (earnings, years) => {		
+const printEarnings = (earnings, nbrYears) => {		
 	const _formatNumber = (n) => {
 		if (typeof n === 'number') {
 			return Math.round(n, 1);
@@ -47,7 +48,7 @@ const printEarnings = (earnings, years) => {
 		const years = earnings[key]['earnings'];
 		log(chalk.bold('\n'+earnings[key]['symbol']));
 		log(printf('%15s%14s%13s%10s%14s%13s','EPS', 'EPS Q/Q (%)', 'EPS Y/Y (%)', 'Rev', 'Rev Q/Q (%)', 'Rev Y/Y (%)'));
-		Object.keys(years).slice(-years).reverse().forEach(key => {			
+		Object.keys(years).slice(-nbrYears).reverse().forEach(key => {			
 			Object.entries(years[key]).forEach(([q, val]) => {
 				log(printf('%s%8s%14s%13s%10s%14s%13s', `${q} ${key}`,val['eps'], _formatNumber(val['eps Q/Q (%)']), _formatNumber(val['eps Y/Y (%)']), _formatRev(val['revenue']),_formatNumber(val['rev Q/Q (%)']), _formatNumber(val['rev Y/Y (%)'])));
 			});
