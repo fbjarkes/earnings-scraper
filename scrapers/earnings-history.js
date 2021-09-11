@@ -107,9 +107,9 @@ class EarningsHistory {
                 return 'Neg';
             }                        
         }        
-        for (let i = 0; i < Object.keys(this.earnings).length; i++) {
-            const quarters = this.earnings[currYear-i];
-            const y = currYear - i;            
+//        for (let i = 0; i < Object.keys(this.earnings).length; i++) {
+        Object.keys(this.earnings).forEach(y => {
+            const quarters = this.earnings[y];        
             Object.keys(quarters).forEach(q => {
                 this.earnings[y][q]['eps Q/Q (%)'] = '-';
                 this.earnings[y][q]['rev Q/Q (%)'] = '-';
@@ -155,7 +155,7 @@ class EarningsHistory {
                     }                    
                 }                
             })
-        }
+        });
     }
 }
 

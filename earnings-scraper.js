@@ -7,7 +7,6 @@ const argv = require('yargs').argv;
 const chalk = require('chalk');
 const log = console.log;
 
-const { data } = require('./data');
 const { SeekingAlphaScraper } = require('./scrapers/seeking-alpha');
 
 const getSymbols = async (symbolsList, symbolsFile) => {
@@ -34,15 +33,15 @@ const printEarnings = (earnings) => {
 	}
 	const _formatRev = (n) => {
 		if (Math.abs(n) <= 1_000_000) { 
-			return `${(n/100).toFixed(1)}K`;
+			return `${(n/1000).toFixed(1)}K`;
 		}
-		if (Math.abs(n) <= 100_000_000) {
-			return `${(n/100_000).toFixed(1)}M`;
+		if (Math.abs(n) <= 1_000_000_000) {
+			return `${(n/1_000_000).toFixed(1)}M`;
 		}
-		if (Math.abs(n) <= 100_000_000_000) {
-			return `${(n/100_000_000).toFixed(1)}B`;
+		if (Math.abs(n) <= 1_000_000_000_000) {
+			return `${(n/1_000_000_000).toFixed(1)}B`;
 		}
-		return `${(n/100_000_000_000).toFixed(1)}T`;
+		return `${(n/1_000_000_000_000).toFixed(1)}T`;
 	}
 
 	Object.keys(earnings).forEach(key => {
@@ -64,22 +63,14 @@ const printEarnings = (earnings) => {
 	})
 }
 
-const download = async (symbols) => {		
-	const results = [];
-	const scraper = new SeekingAlphaScraper();
-	await scraper.init(puppeteer);
-	await Promise.all(symbols.map(async symbol => {		
-		// await sleep(500);
-		// results.push({symbol: sym, earnings: {foo: 1}});
-		// eslint-disable-next-line
-		console.log('Getting for data for symbol', symbol);
-		const res = await scraper.getEarnings(symbol);			
-		results.push({symbol, earnings: res.earnings});
-	}));
-	await scraper.finalize();
-	// TODO: wait randomly for 1-5s?
-	return results;
+const download = async (symbol, scraper) => {		
+	// eslint-disable-next-line
+	console.log('Getting for data for symbol', symbol);
+	const res = await scraper.getEarnings(symbol);
+	return {symbol, earnings: res.earnings};		
 }
+
+
 
 const main = async () => {
 	if (!(argv.symbols || argv.symbolsFile)) {
@@ -87,13 +78,19 @@ const main = async () => {
 		// eslint-disable-next-line
 		process.exit(1);
 	}
+	let results = [];
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
-	//TODO: handle chunks in a series of promises or concurrency 1?
-	const results = await Promise.all(_.chunk(symbols, 2).map(async chunk => download(chunk)));
-	//console.log("========");
-	const res = _.flatten(results);
-	console.log(res);
-	//printEarnings(res);
+
+	for (const chunk of _.chunk(symbols, 4)) {
+		const scraper = new SeekingAlphaScraper();
+		await scraper.init(puppeteer);		
+		const res = await Promise.all(chunk.map(async sym => download(sym, scraper)));
+		results = results.concat(res);
+		await scraper.finalize();
+		// TODO: wait randomly for 1-5s?
+	}	
+	const res = _.flatten(results);	
+	printEarnings(res);
 }
 
 main();
