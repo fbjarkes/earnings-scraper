@@ -1,18 +1,16 @@
 {
   "name": "earnings-scraper",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "Simple earnings reports web scraping tool",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint **/*.js --fix"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fbjarkes/earnings-scraper.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "fbjarkes",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/fbjarkes/earnings-scraper/issues"
   },
