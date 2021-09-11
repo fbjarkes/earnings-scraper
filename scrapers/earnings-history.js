@@ -44,9 +44,9 @@ class EarningsHistory {
         let rev;        
         const revenueLine = revStr.split('\n').filter(line => line.includes('Revenue')).pop();        
         rev = revenueLine?.match(this.numberPatternMillion);
-        if (rev) return parseFloat(rev) * 1000000
+        if (rev) return parseFloat(rev) * 1_000_000
         rev = revenueLine?.match(this.numberPatternBillion);
-        if (rev) return parseFloat(rev) * 1000000000;
+        if (rev) return parseFloat(rev) * 1_000_000_000;
         rev = revenueLine?.match(this.numberPatternThousand);
         return parseFloat(rev) * 1000;
     }
