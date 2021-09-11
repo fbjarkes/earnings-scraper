@@ -85,9 +85,7 @@ class EarningsHistory {
         this.earnings[year][quarter.replace('F','')] = q;
     }
 
-    calculateYearlyAndQuarterly() {
-        const currYear = new Date().getFullYear();
-        
+    calculateYearlyAndQuarterly() {       
         const _quarterlyGrowth = (currQuarter, metric, prevQuarter, year) => {
             const offset = (currQuarter === 'Q1' ? 1 : 0 );
             if (this.earnings[year][currQuarter][metric] > 0 && this.earnings[year - offset][prevQuarter][metric] > 0) {                    
@@ -107,7 +105,7 @@ class EarningsHistory {
                 return 'Neg';
             }                        
         }        
-//        for (let i = 0; i < Object.keys(this.earnings).length; i++) {
+        
         Object.keys(this.earnings).forEach(y => {
             const quarters = this.earnings[y];        
             Object.keys(quarters).forEach(q => {

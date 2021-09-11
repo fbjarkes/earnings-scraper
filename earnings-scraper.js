@@ -70,8 +70,6 @@ const download = async (symbol, scraper) => {
 	return {symbol, earnings: res.earnings};		
 }
 
-
-
 const main = async () => {
 	if (!(argv.symbols || argv.symbolsFile)) {
 		printUsage();
