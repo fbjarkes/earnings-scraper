@@ -1,8 +1,42 @@
 const R = require('ramda');
+const chalk = require('chalk');
+const {printf} = require('fast-printf');
+
+const prettyString = (nbrYears, earningsForSymbol) => {    
+	const _formatNumber = (n) => {
+		if (typeof n === 'number') {
+			return Math.round(n, 1);
+		}
+		return n; // Could be 'Neg' or 'Pos'
+	}
+	const _formatRev = (n) => {
+		if (Math.abs(n) <= 1_000_000) { 
+			return `${(n/1000).toFixed(1)}K`;
+		}
+		if (Math.abs(n) <= 1_000_000_000) {
+			return `${(n/1_000_000).toFixed(1)}M`;
+		}
+		if (Math.abs(n) <= 1_000_000_000_000) {
+			return `${(n/1_000_000_000).toFixed(1)}B`;
+		}
+		return `${(n/1_000_000_000_000).toFixed(1)}T`;
+	}
+    let out = '';
+	const years = earningsForSymbol['earnings'];
+    
+	out += chalk.bold('\n'+earningsForSymbol['symbol']) + '\n';
+	out += printf('%15s%14s%13s%10s%14s%13s','EPS', 'EPS Q/Q (%)', 'EPS Y/Y (%)', 'Rev', 'Rev Q/Q (%)', 'Rev Y/Y (%)') + '\n';
+	Object.keys(years).slice(-nbrYears).reverse().forEach(key => {
+		Object.entries(years[key]).forEach(([q, val]) => {
+			out += printf('%s%8s%14s%13s%10s%14s%13s', `${q} ${key}`,val['eps'], _formatNumber(val['eps Q/Q (%)']), _formatNumber(val['eps Y/Y (%)']), _formatRev(val['revenue']),_formatNumber(val['rev Q/Q (%)']), _formatNumber(val['rev Y/Y (%)'])) + '\n';
+		});			
+	});		
+    return out;
+}
 
 const getLatestYear = (earnings) => earnings[Object.keys(earnings).pop()];
 const getLatestQuarter = (quarter) => quarter[Object.keys(quarter).shift()];
-const getLatestEarnings = R.pipe(getLatestYear, getLatestQuarter);
+const getLastQuarterEarnings = R.pipe(getLatestYear, getLatestQuarter);
 
 const lastQuarterGrowthFilter = ({ epsQQ, revQQ, epsYY, revYY }, earningsData) => {
 	const lastQuarterEpsQtrByQtrFilter = R.propSatisfies(
@@ -45,11 +79,12 @@ const lastQuarterGrowthFilter = ({ epsQQ, revQQ, epsYY, revYY }, earningsData) =
 			lastQuarterRevYearByYearFilter,
 			lastQuarterRevQtrByQtrFilter
 		]),
-		getLatestEarnings
+		getLastQuarterEarnings
 	);
 	return filterQuarter(earningsData);
 };
 
 module.exports = {
-	lastQuarterGrowthFilter
+	lastQuarterGrowthFilter,
+    prettyString
 };
