@@ -28,10 +28,10 @@ const printUsage = () => {
 
 const download = async (symbol, scraper, verbose=0) => {
 	if (verbose) {
-		console.log('Getting for data for symbol', symbol);
+		log('Getting data for symbol', symbol);
 	}			
-	const res = await scraper.getEarnings(symbol);
-	return {symbol, earnings: res.earnings};		
+	const res = await scraper.getEarnings(symbol, verbose);
+	return res;
 }
 
 const main = async () => {
@@ -47,7 +47,8 @@ const main = async () => {
 	let epsYY = parseInt(argv.epsYY) || null;
 	let revQQ = parseInt(argv.revQQ) || null;
 	let revYY = parseInt(argv.revYY) || null;
-	let earningsHistoryForSymbols = [];
+	let symbolEarningsHistoryList = [];
+	let symbolEarningsHistoryErrorList = [];
 	
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
 
@@ -56,26 +57,34 @@ const main = async () => {
 		await scraper.init(puppeteer);		
 		//const res = await Promise.all(chunk.map(async sym => download(sym, scraper).then(() => statusbar(current++))));
 		const res = await Promise.all(chunk.map(async sym => download(sym, scraper, verbose)));
-		earningsHistoryForSymbols = earningsHistoryForSymbols.concat(res);
+		res.forEach(e => {
+			if (e.isError()) {
+				symbolEarningsHistoryErrorList.push(e);
+			} else {
+				symbolEarningsHistoryList.push(e);
+			}
+		});
 		await scraper.finalize();
 		// TODO: wait randomly for 1-5s?
 	}	
 	
-	earningsHistoryForSymbols.forEach(({symbol, earnings}) => {		
-		if (lastQuarterGrowthFilter({epsQQ, epsYY, revQQ, revYY}, earnings)) {	
+	symbolEarningsHistoryList.forEach(symbolEarningsHistory => {		
+		if (lastQuarterGrowthFilter({epsQQ, epsYY, revQQ, revYY}, symbolEarningsHistory.getEarnings())) {	
 			if (epsQQ !== null || epsYY !== null | revQQ !== null | revYY !== null) { // Watchlist generation mode
 				if (verbose) {
-					const output = prettyString(nbrYears, {symbol, earnings});
+					const output = prettyString(nbrYears, {symbol: symbolEarningsHistory.getSymbol(), earnings: symbolEarningsHistory.getEarnings()});
 					log(output);
 				} else {
-					log(symbol);
+					log(symbolEarningsHistory.getSymbol());
 				}			
 			} else {
-				const output = prettyString(nbrYears, {symbol, earnings});
+				const output = prettyString(nbrYears, {symbol: symbolEarningsHistory.getSymbol(), earnings: symbolEarningsHistory.getEarnings()});
 				log(output);
 			}			
 		}
 	});
+
+	//TODO: symbolEarningsHistoryErrorList 
 }
 
 main();

@@ -1,3 +1,4 @@
+const {SymbolEarningsHistory} = require('../symbol-earnings-history');
 const { EarningsHistory } = require("./earnings-history");
 
 class SeekingAlphaScraper {
@@ -8,17 +9,17 @@ class SeekingAlphaScraper {
         this.#browser = await puppeteer.launch({ headless });
     }
 
-    async getEarnings(symbol) {
+    async getEarnings(symbol, verbose = 0) {
         try {                           
             //const page = await this.#browser.newPage();             
             const context = await this.#browser.createIncognitoBrowserContext();
             const page = await context.newPage();
             //await page.goto(`https://seekingalpha.com/`);
             const res = await page.goto(`https://seekingalpha.com/symbol/${symbol}/earnings`);
-            if (res._status === 403) {
-                console.log("ERROR 403 for ", symbol );
+            if (res._status !== 200) {
+                throw new Error(`Error ${res._status} for symbol ${symbol}`);
             }
-
+            
             await page.waitForSelector('.earning-title');
             const elements = await page.$$('.earning-title');
             const earningsHistory = new EarningsHistory();
@@ -26,18 +27,19 @@ class SeekingAlphaScraper {
                 const [period, eps, revenue] = await Promise.all([element.$('.title-period'),element.$('.eps'),element.$('.revenue')]);                
                 const [{_remoteObject: {value: periodContent}}, {_remoteObject: {value: epsContent}}, {_remoteObject: {value: revContent}}] = await Promise.all([period.getProperty('textContent'), eps.getProperty('textContent'), revenue.getProperty('textContent')])                                
                 // console.log(symbol);
-                // console.log(periodContent);
+                // console.log(periodContent);§
                 // console.log(epsContent);
                 // console.log(revContent);        
                 earningsHistory.addEarningsData(periodContent, epsContent, revContent);
             }
             earningsHistory.calculateYearlyAndQuarterly()
-            return earningsHistory;
+            return new SymbolEarningsHistory(symbol, earningsHistory.getEarnings());
         
         } catch (error) {
-            console.log('Error for', symbol);
-            console.log(error);
-            return new EarningsHistory();
+            if (verbose > 0) {
+                console.log(error);
+            }
+            return new SymbolEarningsHistory(symbol, {}); // TODO: save error msg?
         }
     }
 
