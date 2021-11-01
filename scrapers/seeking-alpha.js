@@ -18,7 +18,8 @@ class SeekingAlphaScraper {
             if (res._status === 403) {
                 console.log("ERROR 403 for ", symbol );
             }
-            //await page.waitForNavigation()
+
+            await page.waitForSelector('.earning-title');
             const elements = await page.$$('.earning-title');
             const earningsHistory = new EarningsHistory();
             for (let element of elements) {

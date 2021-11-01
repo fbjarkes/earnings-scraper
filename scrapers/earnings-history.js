@@ -1,32 +1,34 @@
-//  Example input:
-//   'FQ2 2022 (Jul 2021)': {
-//     eps: ' EPS of $1.29\n          beat by $1.11\n        ',
-//     rev: '\n' +
-//       '        Revenue  of $5.65B\n' +
-//       '          \n' +
-//       '            (58.67% YoY)\n' +
-//       '          \n' +
-//       '          beat by $643.28M\n' +
-//       '        '
-//   },
-//  
-//  Output:
-// {
-//     '2022': {
-//         'FQ2': {
-//              'date': 'Jul 2021'
-//              'eps: 1.29
-//              'eps_beat': 1.11
-//              'rev': 5650000000
-//              'rev_beat': 643280000
-//              'yoy': '58.67%'
-//         }, 
-//         'FQ1': ...
-//     },
-//     '2021': ...
-// }
 
-
+/**
+ * Simple object representing earnings data for one symbol
+ * Example earnings object:
+ * {
+ *   '2022': {
+ *       'FQ2': {
+ *            'date': 'Jul 2021'
+ *            'eps: 1.29
+ *            'eps_beat': 1.11
+ *            'rev': 5650000000
+ *            'rev_beat': 643280000
+ *            'yoy': '58.67%'
+ *       }, 
+ *       'FQ1': ...
+ *   },
+ *   '2021': ...
+ * } 
+ * 
+ * Given this input:
+ * FQ2 2022 (Jul 2021)': {
+ *    eps: ' EPS of $1.29\n          beat by $1.11\n        ',
+ *   rev: '\n' +
+ *     '        Revenue  of $5.65B\n' +
+ *     '          \n' +
+ *     '            (58.67% YoY)\n' +
+ *     '          \n' +
+ *     '          beat by $643.28M\n' +
+ *     '        '
+ *},
+ */
 class EarningsHistory {
 
     numberPattern = /-?\d+\.\d+/g

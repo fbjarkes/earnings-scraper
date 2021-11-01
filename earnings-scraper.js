@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+const R = require('ramda');
 const _ = require('lodash');
 const {printf} = require('fast-printf');
 const puppeteer = require('puppeteer');
@@ -8,7 +8,9 @@ const argv = require('yargs').argv;
 const chalk = require('chalk');
 const log = console.log;
 
+const {lastQuarterGrowthFilter, prettyString} = require('./helper');
 const { SeekingAlphaScraper } = require('./scrapers/seeking-alpha');
+
 
 const getSymbols = async (symbolsList, symbolsFile) => {
 	if (symbolsList) {
@@ -24,47 +26,10 @@ const printUsage = () => {
 	console.log('Usage');
 };
 
-const printEarnings = (earnings, nbrYears) => {		
-	const _formatNumber = (n) => {
-		if (typeof n === 'number') {
-			return Math.round(n, 1);
-		}
-		return n; // Could be 'Neg' or 'Pos'
-	}
-	const _formatRev = (n) => {
-		if (Math.abs(n) <= 1_000_000) { 
-			return `${(n/1000).toFixed(1)}K`;
-		}
-		if (Math.abs(n) <= 1_000_000_000) {
-			return `${(n/1_000_000).toFixed(1)}M`;
-		}
-		if (Math.abs(n) <= 1_000_000_000_000) {
-			return `${(n/1_000_000_000).toFixed(1)}B`;
-		}
-		return `${(n/1_000_000_000_000).toFixed(1)}T`;
-	}
-
-	Object.keys(earnings).forEach(key => {
-		const years = earnings[key]['earnings'];
-		log(chalk.bold('\n'+earnings[key]['symbol']));
-		log(printf('%15s%14s%13s%10s%14s%13s','EPS', 'EPS Q/Q (%)', 'EPS Y/Y (%)', 'Rev', 'Rev Q/Q (%)', 'Rev Y/Y (%)'));
-		Object.keys(years).slice(-nbrYears).reverse().forEach(key => {			
-			Object.entries(years[key]).forEach(([q, val]) => {
-				log(printf('%s%8s%14s%13s%10s%14s%13s', `${q} ${key}`,val['eps'], _formatNumber(val['eps Q/Q (%)']), _formatNumber(val['eps Y/Y (%)']), _formatRev(val['revenue']),_formatNumber(val['rev Q/Q (%)']), _formatNumber(val['rev Y/Y (%)'])));
-			});
-  
-			//log(printf('%s%14s%14s%18s%13s', `${key}: ${q['date']}`, q['eps Q/Q (%)'], q['eps Y/Y (%)'], q['rev Q/Q (%)'], q['rev Y/Y (%)']));
-			//log(printf('%s%14s%14s%18s%13s', '2021 Q3:', '24%', '120%', '-12%', '45%'));
-		});
-				
-		// log(printf('%s%14s%14s%18s%13s', '2021 Q3:', '24%', '120%', '-12%', '45%'));
-		// log(printf('%s%14s%14s%18s%13s', '2021 Q2:', 'Neg', '-2%', '1240%', '1000%'));
-		
-	})
-}
-
-const download = async (symbol, scraper) => {		
-	console.log('Getting for data for symbol', symbol);
+const download = async (symbol, scraper, verbose=0) => {
+	if (verbose) {
+		console.log('Getting for data for symbol', symbol);
+	}			
 	const res = await scraper.getEarnings(symbol);
 	return {symbol, earnings: res.earnings};		
 }
@@ -75,21 +40,42 @@ const main = async () => {
 		// eslint-disable-next-line
 		process.exit(1);
 	}
+	let verbose = argv.v ? 1 : 0;
 	let nbrChunks = parseInt(argv.parallel) || 3;
 	let nbrYears = parseInt(argv.years) || 2;
-	let results = [];
+	let epsQQ = parseInt(argv.epsQQ) || null;
+	let epsYY = parseInt(argv.epsYY) || null;
+	let revQQ = parseInt(argv.revQQ) || null;
+	let revYY = parseInt(argv.revYY) || null;
+	let earningsHistoryForSymbols = [];
+	
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
 
 	for (const chunk of _.chunk(symbols, nbrChunks)) {
 		const scraper = new SeekingAlphaScraper();
 		await scraper.init(puppeteer);		
-		const res = await Promise.all(chunk.map(async sym => download(sym, scraper)));
-		results = results.concat(res);
+		//const res = await Promise.all(chunk.map(async sym => download(sym, scraper).then(() => statusbar(current++))));
+		const res = await Promise.all(chunk.map(async sym => download(sym, scraper, verbose)));
+		earningsHistoryForSymbols = earningsHistoryForSymbols.concat(res);
 		await scraper.finalize();
 		// TODO: wait randomly for 1-5s?
 	}	
-	const res = _.flatten(results);	
-	printEarnings(res, nbrYears);
+	
+	earningsHistoryForSymbols.forEach(({symbol, earnings}) => {		
+		if (lastQuarterGrowthFilter({epsQQ, epsYY, revQQ, revYY}, earnings)) {	
+			if (epsQQ !== null || epsYY !== null | revQQ !== null | revYY !== null) { // Watchlist generation mode
+				if (verbose) {
+					const output = prettyString(nbrYears, {symbol, earnings});
+					log(output);
+				} else {
+					log(symbol);
+				}			
+			} else {
+				const output = prettyString(nbrYears, {symbol, earnings});
+				log(output);
+			}			
+		}
+	});
 }
 
 main();
