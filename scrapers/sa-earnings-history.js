@@ -161,5 +161,5 @@ class SeekingAlphaEarningsHistory {
 
 
 module.exports = {
-    EarningsHistory: SeekingAlphaEarningsHistory
+    SeekingAlphaEarningsHistory
 };

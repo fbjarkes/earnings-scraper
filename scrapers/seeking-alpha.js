@@ -1,6 +1,6 @@
 const { getRandomHeaders } = require('../helper');
 const {SymbolEarningsHistory} = require('../symbol-earnings-history');
-const { EarningsHistory } = require("./earnings-history");
+const { SeekingAlphaEarningsHistory } = require("./sa-earnings-history");
 
 class SeekingAlphaScraper {
 
@@ -27,7 +27,7 @@ class SeekingAlphaScraper {
             
             await page.waitForSelector('.earning-title');
             const elements = await page.$$('.earning-title');
-            const earningsHistory = new EarningsHistory();
+            const earningsHistory = new SeekingAlphaEarningsHistory();
             for (let element of elements) {
                 const [period, eps, revenue] = await Promise.all([element.$('.title-period'),element.$('.eps'),element.$('.revenue')]);                
                 const [{_remoteObject: {value: periodContent}}, {_remoteObject: {value: epsContent}}, {_remoteObject: {value: revContent}}] = await Promise.all([period.getProperty('textContent'), eps.getProperty('textContent'), revenue.getProperty('textContent')])                                

@@ -1,11 +1,8 @@
 #!/usr/bin/env node
-const R = require('ramda');
 const _ = require('lodash');
-const {printf} = require('fast-printf');
 const puppeteer = require('puppeteer');
 const fs = require('fs').promises;
 const argv = require('yargs').argv;
-const chalk = require('chalk');
 const log = console.log;
 
 const {lastQuarterGrowthFilter, prettyString} = require('./helper');
