@@ -46,7 +46,8 @@ const main = async () => {
 	let revYY = parseInt(argv.revYY) || null;
 	let symbolEarningsHistoryList = [];
 	let symbolEarningsHistoryErrorList = [];
-	
+	let currentChunkNbr = 1;
+
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
 	for (const chunk of _.chunk(symbols, symbolsPerChunk)) {
 		const scraper = new SeekingAlphaScraper();
@@ -60,9 +61,12 @@ const main = async () => {
 				symbolEarningsHistoryList.push(e);
 			}
 		});
-		await scraper.finalize();		
-		// eslint-disable-next-line no-undef
-		await new Promise(resolve => setTimeout(resolve, _.random(10,20) * 1000));
+		await scraper.finalize();
+
+		if (currentChunkNbr++ < Math.ceil(symbols.length/symbolsPerChunk)) {
+			// eslint-disable-next-line no-undef
+			await new Promise(resolve => setTimeout(resolve, _.random(10,20) * 1000));
+		}
 	}	
 	
 	symbolEarningsHistoryList.forEach(symbolEarningsHistory => {		
