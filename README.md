@@ -3,7 +3,9 @@ A simple earnings reports web scraping tool.
 Using Puppeter non-headless browser mode in order to avoid robot/bot web scraping protection. 
 
 Calculates and prints the most interesting numbers, e.g. yearly and quarterly EPS/Rev growth, to console.
-## Example
+
+In case of any erroneous requests, the symbol in question is written to stderr.
+## Example: print earnings numbers in a structured format
 ```
  $ earnings-scraper.js --symbols AAPL,TSLA
 ```
@@ -27,6 +29,19 @@ Q4 2020     0.8             5           95     10.7B            22           46
 Q3 2020    0.76            73          105      8.8B            45           39
 Q2 2020    0.44            91          Pos      6.0B             1           -5
 Q1 2020    0.23           -44          Pos      6.0B           -19           32
+```
+
+## Example: for watchlist generation, print symbols satisfying a set of criteria, e.g. triple digit growth
+```
+$ earnings-scraper.js --file universe.txt --epsYY 99 --revYY 99
+````
+Output:
+```
+TSLA
+MDB
+DDOG
+DOCU
+...
 ```
 ## Non-headless Chromium popup workaround
 ``

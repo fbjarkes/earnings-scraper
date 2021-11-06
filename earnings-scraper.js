@@ -83,8 +83,10 @@ const main = async () => {
 			}			
 		}
 	});
-
-	//TODO: symbolEarningsHistoryErrorList 
+	if (symbolEarningsHistoryErrorList.length > 0) {
+		console.error('##Errors');
+	}
+	symbolEarningsHistoryErrorList.forEach(symbolEarningsHistory => console.error(symbolEarningsHistory.getSymbol()));
 }
 
 main();
