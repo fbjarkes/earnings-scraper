@@ -30,7 +30,7 @@ const download = async (symbol, scraper, verbose=0) => {
 	if (verbose) {
 		log('Getting data for symbol', symbol);
 	}			
-	const res = await scraper.getEarnings(symbol, verbose);
+	const res = await scraper.getEarnings(symbol, verbose, true);
 	return res;
 }
 
@@ -41,7 +41,7 @@ const main = async () => {
 		process.exit(1);
 	}
 	let verbose = argv.v ? 1 : 0;
-	let nbrChunks = parseInt(argv.parallel) || 3;
+	let symbolsPerChunk = parseInt(argv.parallel) || 2;
 	let nbrYears = parseInt(argv.years) || 2;
 	let epsQQ = parseInt(argv.epsQQ) || null;
 	let epsYY = parseInt(argv.epsYY) || null;
@@ -52,7 +52,7 @@ const main = async () => {
 	
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
 
-	for (const chunk of _.chunk(symbols, nbrChunks)) {
+	for (const chunk of _.chunk(symbols, symbolsPerChunk)) {
 		const scraper = new SeekingAlphaScraper();
 		await scraper.init(puppeteer);		
 		//const res = await Promise.all(chunk.map(async sym => download(sym, scraper).then(() => statusbar(current++))));
@@ -64,8 +64,9 @@ const main = async () => {
 				symbolEarningsHistoryList.push(e);
 			}
 		});
-		await scraper.finalize();
-		// TODO: wait randomly for 1-5s?
+		await scraper.finalize();		
+		// eslint-disable-next-line no-undef
+		await new Promise(resolve => setTimeout(resolve, _.random(10,20) * 1000));
 	}	
 	
 	symbolEarningsHistoryList.forEach(symbolEarningsHistory => {		

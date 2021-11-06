@@ -29,7 +29,7 @@
  *     '        '
  *},
  */
-class EarningsHistory {
+class SeekingAlphaEarningsHistory {
 
     numberPattern = /-?\d+\.\d+/g
     numberPatternBillion = /-?\d+\.\d+(B)/g
@@ -55,7 +55,7 @@ class EarningsHistory {
 
     parseEps(epsStr) {
         const epsLine = epsStr.split('\n').filter(line => line.includes('EPS')).pop();
-        return parseFloat(epsLine.replace('$','').match(this.numberPattern)?.pop());
+        return parseFloat(epsLine?.replace('$','').match(this.numberPattern)?.pop());
     }
 
     parseBeatOrMiss(epsStr) {
@@ -161,5 +161,5 @@ class EarningsHistory {
 
 
 module.exports = {
-    EarningsHistory
+    EarningsHistory: SeekingAlphaEarningsHistory
 };
