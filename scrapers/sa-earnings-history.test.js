@@ -8,6 +8,10 @@ describe('SeekingAlphaEarningsHistory', () => {
             const revContent = '\n       Revenue  of $11.88M\n         beat by $2.60M';
             expect(earningsHistory.parseRevenue(revContent)).to.eq(11880000);
         });
+        it('should handle zero revenue', () => {
+            const revContent = '\n       Revenue  of $0.00\n         in-line';
+            expect(earningsHistory.parseRevenue(revContent)).to.eq(0);
+        });
         it('should handle erroneous data', () => {
             expect(earningsHistory.parseRevenue('\n   \n')).to.be.NaN;
             expect(earningsHistory.parseRevenue(undefined)).to.be.NaN;
