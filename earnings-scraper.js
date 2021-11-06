@@ -5,7 +5,7 @@ const fs = require('fs').promises;
 const argv = require('yargs').argv;
 const log = console.log;
 
-const {lastQuarterGrowthFilter, prettyString} = require('./helper');
+const {lastQuarterGrowthFilter, prettyString} = require('./utils/helper');
 const { SeekingAlphaScraper } = require('./scrapers/seeking-alpha');
 
 
@@ -48,7 +48,6 @@ const main = async () => {
 	let symbolEarningsHistoryErrorList = [];
 	
 	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
-
 	for (const chunk of _.chunk(symbols, symbolsPerChunk)) {
 		const scraper = new SeekingAlphaScraper();
 		await scraper.init(puppeteer);		

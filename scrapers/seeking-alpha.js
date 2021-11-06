@@ -1,5 +1,5 @@
-const { getRandomHeaders } = require('../helper');
-const {SymbolEarningsHistory} = require('../symbol-earnings-history');
+const { getRandomHeaders } = require('../utils/helper');
+const {SymbolEarningsHistory} = require('../utils/symbol-earnings-history');
 const { SeekingAlphaEarningsHistory } = require("./sa-earnings-history");
 
 class SeekingAlphaScraper {
