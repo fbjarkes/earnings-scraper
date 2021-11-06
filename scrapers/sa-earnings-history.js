@@ -43,6 +43,9 @@ class SeekingAlphaEarningsHistory {
     }
 
     parseRevenue(revStr) {
+        if (!revStr) {
+            return NaN;
+        }
         let rev;        
         const revenueLine = revStr.split('\n').filter(line => line.includes('Revenue')).pop();        
         rev = revenueLine?.match(this.numberPatternMillion);
@@ -54,11 +57,17 @@ class SeekingAlphaEarningsHistory {
     }
 
     parseEps(epsStr) {
-        const epsLine = epsStr.split('\n').filter(line => line.includes('EPS')).pop();
+        if (!epsStr) {
+            return NaN;
+        }
+        const epsLine = epsStr.split('\n').filter(line => line.includes('EPS') || line.includes('FFO')).pop();
         return parseFloat(epsLine?.replace('$','').match(this.numberPattern)?.pop());
     }
 
     parseBeatOrMiss(epsStr) {
+        if (!epsStr) {
+            return NaN;
+        }
         const epsLine = epsStr.split('\n').filter(line => line.includes('by')).pop();
         return parseFloat(epsLine?.replace('$','').match(this.numberPattern)?.pop());
     }
@@ -88,8 +97,11 @@ class SeekingAlphaEarningsHistory {
     }
 
     calculateYearlyAndQuarterly() {       
-        const _quarterlyGrowth = (currQuarter, metric, prevQuarter, year) => {
+        const _quarterlyGrowth = (currQuarter, metric, prevQuarter, year) => {            
             const offset = (currQuarter === 'Q1' ? 1 : 0 );
+            if (isNaN(this.earnings[year][currQuarter][metric]) || isNaN(this.earnings[year - offset][prevQuarter][metric])) {
+                return '-';
+            }  
             if (this.earnings[year][currQuarter][metric] > 0 && this.earnings[year - offset][prevQuarter][metric] > 0) {                    
                 return ((this.earnings[year][currQuarter][metric] / this.earnings[year - offset][prevQuarter][metric]) - 1) * 100;
             } else if (this.earnings[year][currQuarter][metric] >= 0 && this.earnings[year - offset][prevQuarter][metric] < 0) {
@@ -98,7 +110,10 @@ class SeekingAlphaEarningsHistory {
                 return 'Neg';
             }                 
         }
-        const _yearlyGrowth = (quarter, metric, year) => {     
+        const _yearlyGrowth = (quarter, metric, year) => { 
+            if (isNaN(this.earnings[year][quarter][metric]) || isNaN(this.earnings[year - 1][quarter][metric])) {
+                return '-';
+            }    
             if (this.earnings[year][quarter][metric] > 0 && this.earnings[year - 1][quarter][metric] > 0) {
                 return ((this.earnings[year][quarter][metric] / this.earnings[year - 1][quarter][metric]) - 1) * 100;
             } else if ((this.earnings[year][quarter][metric] >= 0 && this.earnings[year - 1][quarter][metric] < 0)) {
