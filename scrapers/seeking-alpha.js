@@ -25,7 +25,7 @@ class SeekingAlphaScraper {
                 throw new Error(`Error ${res._status} for symbol ${symbol}`);
             }
             
-            await page.waitForSelector('.earning-title');
+            await page.waitForSelector('.earning-title', {timeout: 2000});
             const elements = await page.$$('.earning-title');
             const earningsHistory = new SeekingAlphaEarningsHistory();
             for (let element of elements) {

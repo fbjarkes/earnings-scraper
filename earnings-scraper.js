@@ -32,13 +32,12 @@ const download = async (symbol, scraper, verbose=0) => {
 }
 
 const main = async () => {
-	if (!(argv.symbols || argv.symbolsFile)) {
+	if (!(argv.symbols || argv.file)) {
 		printUsage();
 		// eslint-disable-next-line
 		process.exit(1);
 	}
 	let verbose = argv.v ? 1 : 0;
-	let symbolsPerChunk = parseInt(argv.parallel) || 2;
 	let nbrYears = parseInt(argv.years) || 2;
 	let epsQQ = parseInt(argv.epsQQ) || null;
 	let epsYY = parseInt(argv.epsYY) || null;
@@ -47,8 +46,9 @@ const main = async () => {
 	let symbolEarningsHistoryList = [];
 	let symbolEarningsHistoryErrorList = [];
 	let currentChunkNbr = 1;
+	const symbolsPerChunk = 1;
 
-	const symbols = await getSymbols(argv.symbols, argv.symbolsFile);	
+	const symbols = await getSymbols(argv.symbols, argv.file);	
 	for (const chunk of _.chunk(symbols, symbolsPerChunk)) {
 		const scraper = new SeekingAlphaScraper();
 		await scraper.init(puppeteer);		
@@ -65,7 +65,7 @@ const main = async () => {
 
 		if (currentChunkNbr++ < Math.ceil(symbols.length/symbolsPerChunk)) {
 			// eslint-disable-next-line no-undef
-			await new Promise(resolve => setTimeout(resolve, _.random(10,20) * 1000));
+			await new Promise(resolve => setTimeout(resolve, _.random(5, 10) * 1000));
 		}
 	}	
 	
